@@ -6,10 +6,23 @@ const Sidebar = ({ toggleTheme }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [bluetoothDevice, setBluetoothDevice] = useState(null);
 
   useEffect(() => {
     document.body.className = isDarkMode ? "dark-theme" : "light-theme";
   }, [isDarkMode]);
+
+  const connectBluetooth = async () => {
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+      });
+      setBluetoothDevice(device.name || "Unknown Device");
+      alert(`Connected to ${device.name}`);
+    } catch (error) {
+      alert("Failed to connect to Bluetooth device. Make sure Bluetooth is enabled.");
+    }
+  };
 
   return (
     <>
@@ -35,9 +48,12 @@ const Sidebar = ({ toggleTheme }) => {
               <button onClick={() => setIsDarkMode(!isDarkMode)}>
                 {isDarkMode ? "Light Theme" : "Dark Theme"}
               </button>
-              <button>Connect Bluetooth</button>
+              <button onClick={connectBluetooth}>Connect Bluetooth</button>
             </div>
           </div>
+
+          {/* Show connected device */}
+          {bluetoothDevice && <p>Connected: {bluetoothDevice}</p>}
         </div>
       </div>
 
