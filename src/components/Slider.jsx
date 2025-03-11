@@ -1,61 +1,50 @@
 import React, { useState } from "react";
+import * as XLSX from "xlsx"; // Import XLSX for Excel support
 import "./Slider.css";
-
-const QuadrantDisplay = ({ csvData }) => {
-  const categories = ["What", "When", "Where", "Why"];
-
-  return (
-    <div className="quadrant-container">
-      <h3>Extracted IoT Data</h3>
-      <div className="quadrant-grid">
-        {categories.map((category, index) => (
-          <div key={index} className="quadrant">
-            <h4>{category}</h4>
-            {csvData[category] && csvData[category].length > 0 ? (
-              <ul>
-                {csvData[category].map((item, idx) => (
-                  <li key={idx}>{item}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>No data available</p>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+import VideoUpload from "./VideoUpload";
+import Gallery from "./Gallery";
+import ExcelTable from "./ExcelTable"; // Import Excel Table Component
 
 const Slider = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [csvData, setCsvData] = useState({ What: [], When: [], Where: [], Why: [] });
-  const [showQuadrants, setShowQuadrants] = useState(false);
+  const [excelData, setExcelData] = useState([]);
+  const [showTable, setShowTable] = useState(false);
+  const [imageUrls, setImageUrls] = useState([]); // State for CCTV images
+  const [isProcessing, setIsProcessing] = useState(false); // Processing state
 
-  const handleCSVUpload = (event) => {
+  const handleExcelUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
-      const text = e.target.result;
-      const rows = text.split("\n").map((row) => row.split(","));
+      const data = new Uint8Array(e.target.result);
+      const workbook = XLSX.read(data, { type: "array" });
 
-      const headers = rows[0];
-      const newData = { What: [], When: [], Where: [], Why: [] };
+      const sheetName = workbook.SheetNames[0]; // Read the first sheet
+      const sheet = workbook.Sheets[sheetName];
+      const parsedData = XLSX.utils.sheet_to_json(sheet); // Convert to JSON
 
-      rows.slice(1).forEach((row) => {
-        headers.forEach((header, index) => {
-          if (newData[header]) {
-            newData[header].push(row[index] || "N/A");
-          }
-        });
-      });
+      if (parsedData.length === 0) {
+        alert("Empty file uploaded! Showing dummy data.");
+      }
 
-      setCsvData(newData);
-      setShowQuadrants(true);
+      setExcelData(parsedData); // Store data
+      setShowTable(true);
     };
-    reader.readAsText(file);
+
+    reader.readAsArrayBuffer(file);
+  };
+
+  const handleCCTVUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsProcessing(true);
+    setTimeout(() => {
+      setImageUrls(["/face.jpg", "/facetwo.jpg"]); // Dummy image display
+      setIsProcessing(false);
+    }, 3000); // 3-second delay to simulate processing
   };
 
   const nextSlide = () => {
@@ -69,30 +58,49 @@ const Slider = () => {
   return (
     <div className="slider-wrapper">
       <div className="slider-container">
+        {/* Slide 1: DashCam Video Upload */}
         <div className={`slide ${currentIndex === 0 ? "active" : ""}`}>
-          <h1>Upload Videos</h1>
-          <input type="file" accept="video/*" />
+          <h1>Upload Videos for DashCam</h1>
+          <VideoUpload />
+          <Gallery />
         </div>
 
+        {/* Slide 2: Excel Upload and Table Display */}
         <div className={`slide ${currentIndex === 1 ? "active" : ""}`}>
-          <h2>Upload CSV for IoT Data</h2>
-          <input type="file" accept=".csv" onChange={handleCSVUpload} />
-          {showQuadrants && <QuadrantDisplay csvData={csvData} />}
+          <h2>Upload Excel for IoT Data</h2>
+          <input type="file" accept=".xlsx" onChange={handleExcelUpload} />
+          {showTable && <ExcelTable excelData={excelData} />}
         </div>
 
+        {/* Slide 3: CCTV Video Upload with Dummy Processing */}
         <div className={`slide ${currentIndex === 2 ? "active" : ""}`}>
-          <h2>Search for Bluetooth Devices</h2>
-          <button>Scan for Devices</button>
+          <h1>Upload Videos for CCTV</h1>
+          <input type="file" accept="video/*" onChange={handleCCTVUpload} />
+          <button onClick={handleCCTVUpload} disabled={isProcessing}>
+            {isProcessing ? "Processing..." : "Process"}
+          </button>
+          
+          {isProcessing && <p>Processing video...</p>}
+          <div className="image-grid">
+            {imageUrls.length > 0 && (
+              <div style={{ display: "flex", gap: "10px" }}>
+                {imageUrls.map((url, index) => (
+                  <img
+                    key={index}
+                    src={url}
+                    alt={`Dummy ${index}`}
+                    style={{ width: "150px", height: "150px", objectFit: "cover" }}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       <div className="navigation-buttons">
-        <button className="prev-btn" onClick={prevSlide}>
-          ❮
-        </button>
-        <button className="next-btn" onClick={nextSlide}>
-          ❯
-        </button>
+        <button className="prev-btn" onClick={prevSlide}>❮</button>
+        <button className="next-btn" onClick={nextSlide}>❯</button>
       </div>
     </div>
   );

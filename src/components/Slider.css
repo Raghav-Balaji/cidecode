@@ -8,7 +8,6 @@
   
   .slider-container {
     display: flex;
-    overflow: hidden;
     width: 75vw;
     height: 75vh;
     background: #f8f8f8;
@@ -16,6 +15,9 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     position: relative;
     transition: height 0.3s ease-in-out;
+    overflow-y: scroll;
+    left: 2vw;
+    top: 5vh;
   }
   
   .slide {
@@ -46,23 +48,31 @@
     cursor: pointer;
     border-radius: 5px;
     margin: 0 10px;
+    position: relative;
+    top: 5vh;
   }
   
-  .quadrant-container {
+  .excel-table-container {
     margin-top: 20px;
-    height: 50%;
+    text-align: center;
+    overflow-x: auto;
   }
   
-  .quadrant-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    column-span: 2;
+  .excel-table {
+    width: 80%;
+    margin: auto;
+    border-collapse: collapse;
+    border: 1px solid black;
   }
   
-  .quadrant {
-    background: #f0f0f0;
-    padding: 20px;
-    border-radius: 10px;
+  .excel-table th, .excel-table td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: left;
   }
+  
+  .excel-table th {
+    background-color: #f4f4f4;
+  }
+  
   
