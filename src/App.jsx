@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 //import axios from 'axios';
-import Sidebar from './components/Sidebar'; // Import Sidebar
-
-import DeviceList from './components/DeviceList';
+import Heading from './components/header';
+import Slider from './components/Slider'; // Import Slider component
 
 const App = () => {
   const [devices, setDevices] = useState([]);
@@ -22,16 +21,19 @@ const App = () => {
   };
 
   return (
-
     <div className="app-container">
-      <Sidebar /> {/* Sidebar always visible */}
+      <Heading />
       <div className="main-content">
-        <h1>Nearby IoT Devices</h1>
+          {/*
         <button onClick={fetchDevices} disabled={loading}>
+        
           {loading ? 'Scanning...' : 'Scan for Devices'}
         </button>
         {error && <p className="error">{error}</p>}
         <DeviceList devices={devices} />
+         */ }
+        {/* Add Slider Component Here */}
+        <Slider />
       </div>
     </div>
   );
